@@ -1,5 +1,3 @@
-# from augmentations import *
-# from models import get_model
 import random
 
 import numpy as np
@@ -8,16 +6,16 @@ import torch
 from torch.utils.data import Dataset
 
 
-class belga2flickrLoader(Dataset):
+class BelgaToFlickrLoader(Dataset):
 
     def __init__(self, root, exp, split='train', is_transform=False, img_size=None, augmentations=None,
                  prototype_sampling_rate=0.005):
         super().__init__()
 
         if split == 'train':
-            self.proto_rate = prototype_sampling_rate
+            self.prototype_sampling_rate = prototype_sampling_rate
         else:
-            self.proto_rate = 0.0
+            self.prototype_sampling_rate = 0.0
         self.inputs = []
         self.targets = []
         self.class_names = []
@@ -87,7 +85,7 @@ class belga2flickrLoader(Dataset):
         template = m.imread(self.root + self.split + '/template_ordered/%02d.jpg' % (gt))
         template = np.array(template, dtype=np.uint8)
 
-        if random.random() < self.proto_rate:
+        if random.random() < self.prototype_sampling_rate:
             img = np.copy(template)
         if self.augmentations is not None:
             img, template = self.augmentations(img, template)
