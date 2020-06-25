@@ -1,0 +1,21 @@
+{
+  "data_path": {
+    "gtsrb": "/home/tunahansalih/School/VPE/db/",
+    "gtsrb2TT100K": "/home/tunahansalih/School/VPE/db/",
+    "belga2flickr": "/home/tunahansalih/School/VPE/db/",
+    "belga2toplogo": "/home/tunahansalih/School/VPE/db/"
+  },
+  "seed": 42,
+  "arch": "vaeIdsiaStn",
+  "dataset": "belga2flickr",
+  "image_paths": "exp_list",
+  "resume": null,
+  "epochs": 1000,
+  "learning_rate": 1e-4,
+  "batch_size": 128,
+  "image_width": 64,
+  "image_height": 64,
+  "data_worker": 4
+}
+
+
