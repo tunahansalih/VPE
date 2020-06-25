@@ -1,21 +1,24 @@
-# This code is modified from the repository
+# This log is modified from the repository
 # https://github.com/ZijunDeng/pytorch-semantic-segmentation/blob/master/utils/joint_transforms.py
 
 import math
 import numbers
 import random
+
 import numpy as np
 from PIL import Image, ImageOps
+
 
 class Compose(object):
     def __init__(self, augmentations):
         self.augmentations = augmentations
 
     def __call__(self, img, mask):
-        img, mask = Image.fromarray(img, mode='RGB'), Image.fromarray(mask, mode='RGB')            
+        img, mask = Image.fromarray(img, mode='RGB'), Image.fromarray(mask, mode='RGB')
         for a in self.augmentations:
             img, mask = a(img, mask)
         return np.array(img), np.array(mask)
+
 
 class RandomCrop(object):
     def __init__(self, size, padding=0):
@@ -41,6 +44,7 @@ class RandomCrop(object):
         y1 = random.randint(0, h - th)
         return img.crop((x1, y1, x1 + tw, y1 + th)), mask.crop((x1, y1, x1 + tw, y1 + th))
 
+
 class CenterCrop(object):
     def __init__(self, size):
         if isinstance(size, numbers.Number):
@@ -56,11 +60,13 @@ class CenterCrop(object):
         y1 = int(round((h - th) / 2.))
         return img.crop((x1, y1, x1 + tw, y1 + th)), mask.crop((x1, y1, x1 + tw, y1 + th))
 
+
 class RandomHorizontallyFlip(object):
     def __call__(self, img, mask):
         if random.random() < 0.5:
             return img.transpose(Image.FLIP_LEFT_RIGHT), mask.transpose(Image.FLIP_LEFT_RIGHT)
         return img, mask
+
 
 class FreeScale(object):
     def __init__(self, size):
@@ -70,11 +76,12 @@ class FreeScale(object):
         # assert img.size == mask.size
         return img.resize(self.size, Image.BILINEAR), mask.resize(self.size, Image.BILINEAR)
 
+
 class Scale(object):
     def __init__(self, size):
         self.size = size
 
-    def __call__(self, img, mask): # longer side of image is scaled to defined size.
+    def __call__(self, img, mask):  # longer side of image is scaled to defined size.
         warning_size = 5
 
         w, h = img.size
@@ -85,7 +92,7 @@ class Scale(object):
             oh = int(self.size * h / w)
 
             if oh < warning_size:
-                print('warning: resized image height is less than %d'%warning_size)
+                print('warning: resized image height is less than %d' % warning_size)
 
             img = img.resize((ow, oh), Image.BILINEAR)
         else:
@@ -93,10 +100,10 @@ class Scale(object):
             ow = int(self.size * w / h)
 
             if ow < warning_size:
-                print('warning: resized image width is less than %d'%warning_size)
+                print('warning: resized image width is less than %d' % warning_size)
 
             img = img.resize((ow, oh), Image.BILINEAR)
-        
+
         w, h = mask.size
         if (w >= h and w == self.size) or (h >= w and h == self.size):
             pass
@@ -105,54 +112,56 @@ class Scale(object):
             oh = int(self.size * h / w)
 
             if oh < warning_size:
-                print('warning: resized template height is less than %d'%warning_size)
+                print('warning: resized template height is less than %d' % warning_size)
 
             mask = mask.resize((ow, oh), Image.BILINEAR)
         else:
             oh = self.size
             ow = int(self.size * w / h)
-            
+
             if ow < warning_size:
-                print('warning: resized template width is less than %d'%warning_size)
-            
+                print('warning: resized template width is less than %d' % warning_size)
+
             mask = mask.resize((ow, oh), Image.BILINEAR)
 
         return img, mask
+
 
 class CenterPadding(object):
     def __init__(self, size):
         self.size = size
 
-    def __call__(self, img, mask): # longer side of image is scaled to defined size.
+    def __call__(self, img, mask):  # longer side of image is scaled to defined size.
         w, h = img.size
 
         assert self.size[0] >= h
         assert self.size[1] >= w
-        w_pad = self.size[1]-w
-        w_pad_left = int(w_pad/2)
+        w_pad = self.size[1] - w
+        w_pad_left = int(w_pad / 2)
         w_pad_right = w_pad - w_pad_left
-        h_pad = self.size[0]-h
-        h_pad_up = int(h_pad/2)
+        h_pad = self.size[0] - h
+        h_pad_up = int(h_pad / 2)
         h_pad_bottom = h_pad - h_pad_up
         padding = (w_pad_left, h_pad_up, w_pad_right, h_pad_bottom)
 
-        img = ImageOps.expand(img, border=padding, fill=0)        
+        img = ImageOps.expand(img, border=padding, fill=0)
 
         w, h = mask.size
 
         assert self.size[0] >= h
         assert self.size[1] >= w
-        w_pad = self.size[1]-w
-        w_pad_left = int(w_pad/2)
+        w_pad = self.size[1] - w
+        w_pad_left = int(w_pad / 2)
         w_pad_right = w_pad - w_pad_left
-        h_pad = self.size[0]-h
-        h_pad_up = int(h_pad/2)
+        h_pad = self.size[0] - h
+        h_pad_up = int(h_pad / 2)
         h_pad_bottom = h_pad - h_pad_up
         padding = (w_pad_left, h_pad_up, w_pad_right, h_pad_bottom)
 
-        mask = ImageOps.expand(mask, border=padding, fill=0) 
+        mask = ImageOps.expand(mask, border=padding, fill=0)
 
         return img, mask
+
 
 class RandomSizedCrop(object):
     def __init__(self, size):
@@ -186,6 +195,7 @@ class RandomSizedCrop(object):
         crop = CenterCrop(self.size)
         return crop(*scale(img, mask))
 
+
 class RandomRotate(object):
     def __init__(self, degree):
         self.degree = degree
@@ -193,6 +203,7 @@ class RandomRotate(object):
     def __call__(self, img, mask):
         rotate_degree = random.random() * 2 * self.degree - self.degree
         return img.rotate(rotate_degree, Image.BILINEAR), mask.rotate(rotate_degree, Image.BILINEAR)
+
 
 class RandomSized(object):
     def __init__(self, size):
